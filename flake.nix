@@ -28,6 +28,13 @@
               (hlib.addBuildDepend pkgs.age)
               (hlib.generateOptparseApplicativeCompletion "hage")
             ];
+            overrides = final: prev: {
+              bech32 = lib.pipe prev.bech32 [
+                hlib.unmarkBroken
+                # The test suite couldn't find the executable for some reason. Crude fix.
+                (hlib.addBuildDepend (hlib.dontCheck (hlib.unmarkBroken prev.bech32)))
+              ];
+            };
           };
           packages.default = config.packages.hage;
 
