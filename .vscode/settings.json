@@ -1,0 +1,6 @@
+{
+  "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+  "nix.formatterPath": "nixpkgs-fmt",
+  "haskell.formattingProvider": "ormolu",
+  "haskell.serverExecutablePath": "haskell-language-server"
+}
