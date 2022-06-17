@@ -3,6 +3,8 @@
 
 _A Haskell implementation of [age encryption](https://age-encryption.org/)_
 
+Pronunciation: [/haːxə/](http://ipa-reader.xyz/?text=ha%CB%90x%C9%99&voice=Ruben), as in Dutch [_'s Gravenhage_](https://translate.google.com/?sl=nl&tl=en&text=%27s%20Gravenhage&op=translate).
+
 ## Status
 
 Work in progress.
