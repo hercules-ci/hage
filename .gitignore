@@ -1,0 +1,10 @@
+
+# haskell
+dist-newstyle
+
+# nix
+result
+result-*
+
+# pre-commit
+.pre-commit-config.yaml
