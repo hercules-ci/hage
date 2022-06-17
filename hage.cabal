@@ -3,22 +3,21 @@ name:               hage
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
--- synopsis:
+synopsis:           Haskell age encryption library and tool
 
 -- A longer description of the package.
--- description:
+description:
+  This is a Haskell implementation of age: a simple, modern and secure file encryption tool, format, and library. See https://github.com/FiloSottile/age
 
 -- A URL where users can report bugs.
--- bug-reports:
+bug-reports:        https://github.com/hercules-ci/hage/issues
 
--- The license under which the package is released.
--- license:
+license:            BSD-3-Clause
 author:             Robert Hensing
 maintainer:         robert@roberthensing.nl
 
--- A copyright notice.
--- copyright:
--- category:
+copyright:          Copyright 2022-... Ensius B.V.
+category:           Cryptography
 extra-source-files: CHANGELOG.md
 
 executable hage
