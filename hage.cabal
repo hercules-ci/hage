@@ -20,7 +20,12 @@ copyright:          Copyright 2022-... Ensius B.V.
 category:           Cryptography
 extra-source-files: CHANGELOG.md
 
+common lang
+    default-language: Haskell2010
+    default-extensions: BlockArguments ScopedTypeVariables
+
 executable hage
+    import:           lang
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
@@ -28,6 +33,7 @@ executable hage
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.15.1.0
+    build-depends:
+      base ^>=4.15.1.0,
+      optparse-applicative,
     hs-source-dirs:   app
-    default-language: Haskell2010

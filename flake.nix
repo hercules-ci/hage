@@ -10,7 +10,7 @@
   };
 
   outputs = inputs@{ self, flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit self; } {
+    flake-parts.lib.mkFlake { inherit self; } ({ lib, ... }: {
       imports = [
         inputs.haskell-flake.flakeModule
         inputs.pre-commit-hooks.flakeModule
@@ -20,6 +20,9 @@
         haskellProjects.hage = {
           name = "hage";
           root = ./.;
+          modifier = lib.flip lib.pipe [
+            (pkgs.haskell.lib.generateOptparseApplicativeCompletion "hage")
+          ];
         };
         packages.default = config.packages.hage;
 
@@ -35,6 +38,16 @@
           '';
         });
 
+        devShells.try = pkgs.mkShell {
+          shellHook = ''
+            echo "This shell has the built hage package in it."
+            echo "Here you can see how it behaves when added to a shell."
+          '';
+          nativeBuildInputs = [
+            config.packages.default
+          ];
+        };
+
         pre-commit.settings.hooks.nixpkgs-fmt.enable = true;
       };
       flake = {
@@ -46,5 +59,5 @@
           "aarch64-darwin"
         ];
       };
-    };
+    });
 }
