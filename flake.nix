@@ -38,6 +38,24 @@
           };
           packages.default = config.packages.hage;
 
+          checks.hage-cli-test = pkgs.runCommand "hage-cli-test"
+            {
+              nativeBuildInputs = [ config.packages.hage pkgs.age ];
+            } ''
+            set -x
+
+            # hage to-recipient-key
+
+            age-keygen -o key.txt
+            cat key.txt
+            age-keygen -y key.txt >expected
+            hage to-recipient-key <key.txt >actual
+            diff expected actual
+
+            set +x
+            touch $out
+          '';
+
           devShells.default = config.devShells.hage.overrideAttrs (o: {
             nativeBuildInputs = o.nativeBuildInputs ++ [
               pkgs.nixpkgs-fmt
