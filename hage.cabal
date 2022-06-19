@@ -32,11 +32,11 @@ common lang
       ScopedTypeVariables
       TupleSections
       TypeApplications
+    ghc-options: -Wall
 
 library
     import:           lang
     hs-source-dirs:   lib
-    ghc-options: -Wall
     exposed-modules:
       Crypto.Hage
       Crypto.Hage.FileKey

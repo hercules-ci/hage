@@ -2,15 +2,14 @@
 
 module Main where
 
-import Conduit (runConduit, runConduitRes, sinkFileBS, stdinC, yield, (.|))
+import Conduit (runConduitRes, sinkFileBS, stdinC, yield, (.|))
 import Control.Monad (join)
 import Crypto.Hage (encryptFileConduit, generateFileKey, toRecipient)
 import Crypto.Hage.Format (parseKeyFile, parseRecipientAddress, recipientToBech32, recipientsToHeader)
 import qualified Crypto.Hage.Recipient.X25519 as X25519
 import qualified Data.ByteString as BS
-import Data.Foldable (Foldable (toList), traverse_)
+import Data.Foldable (traverse_)
 import Data.Function ((&))
-import Data.Functor ((<&>))
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.IO as T
@@ -70,11 +69,11 @@ encryptCommandParser = do
   pure do
     fileKey <- generateFileKey
     stanzas <- recipients & traverse (X25519.share fileKey)
-    let header = recipientsToHeader fileKey stanzas
+    let fileHeader = recipientsToHeader fileKey stanzas
     encrypt <- encryptFileConduit fileKey
     runConduitRes do
       ( do
-          yield header
+          yield fileHeader
           stdinC .| encrypt
         )
         .| sinkFileBS output

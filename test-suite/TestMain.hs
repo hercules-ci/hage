@@ -1,23 +1,18 @@
-import qualified Codec.Binary.Bech32 as Bech32
 import Control.Monad (replicateM)
 import Crypto.Hage (AgeX25519Identity (AgeX25519Identity), encryptFile, generateFileKey, share, toRecipient)
-import Crypto.Hage.Format (AgeParseError (NoIdentitiesFound), parseKeyFile, recipientToBech32, recipientsToHeader)
+import Crypto.Hage.Format (parseKeyFile, recipientToBech32, recipientsToHeader)
 import qualified Data.ByteArray
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
-import Data.Char (ord)
-import Data.Either (fromLeft, fromRight)
 import Data.Functor ((<&>))
 import Data.List.NonEmpty (NonEmpty ((:|)))
-import qualified Data.List.NonEmpty as NEL
-import Data.Maybe (fromJust)
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import Shelly
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec (describe, hspec, it, shouldBe)
-import Test.QuickCheck (Arbitrary (..), chooseBoundedIntegral, chooseInt, property)
+import Test.QuickCheck (Arbitrary (..), chooseInt, property)
 import Test.QuickCheck.Gen (chooseUpTo, frequency)
 
 withTmp :: (FilePath -> IO a) -> IO a
@@ -49,7 +44,7 @@ main =
           shelly $ silently do
             let keyFile = T.pack (tmp </> ("key.txt" :: Text))
                 recipientsFile = T.pack (tmp </> ("recip.txt" :: Text))
-            out <- run "age-keygen" ["-o", keyFile]
+            _ <- run "age-keygen" ["-o", keyFile]
             _ <- run "age-keygen" ["-y", "-o", recipientsFile, keyFile]
             let ciphFile = T.pack (tmp </> ("ciphertext" :: Text))
                 plain = "It's a nice day today."
@@ -77,9 +72,10 @@ main =
         describe "toRecipient" do
           it "can extract a recipient from an identity" do
             let Right (ident :| []) = parseKeyFile "# comment\nAGE-SECRET-KEY-1UMQEQYKX6Y204ULF2HG46W98E256TQYYJJSHHYCX4Q2D72GHNAES7J8XVC\n"
-                recip = toRecipient ident
-            -- constant from age execution
-            recipientToBech32 recip `shouldBe` "age1p8l6mhqvl5zp04g8369nw7fdz2t9msnkpc3xuvz9gcapgs7a79dqcs3yp7"
+                recipient = toRecipient ident
+
+            -- constant taken from an age execution
+            recipientToBech32 recipient `shouldBe` "age1p8l6mhqvl5zp04g8369nw7fdz2t9msnkpc3xuvz9gcapgs7a79dqcs3yp7"
 
         describe "share, encryptFile" do
           it "can generate keys, encrypt and be decrypted by age" $
@@ -87,18 +83,18 @@ main =
               shelly @IO $ silently do
                 let keyFile = T.pack (tmp </> ("key.txt" :: Text))
                     recipientsFile = T.pack (tmp </> ("recip.txt" :: Text))
-                out <- run "age-keygen" ["-o", keyFile]
+                _ <- run "age-keygen" ["-o", keyFile]
                 _ <- run "age-keygen" ["-y", "-o", recipientsFile, keyFile]
                 let ciphFile = T.pack (tmp </> ("ciphertext" :: Text))
 
                 liftIO do
                   contents <- BS.readFile (T.unpack keyFile) <&> TE.decodeUtf8
                   let Right (ident :| []) = parseKeyFile contents
-                      recip = toRecipient ident
+                      recipient = toRecipient ident
 
                   fileKey <- generateFileKey
 
-                  stanza <- share fileKey recip
+                  stanza <- share fileKey recipient
 
                   ciphertext <- encryptFile fileKey plain
                   let out = recipientsToHeader fileKey [stanza] <> ciphertext
