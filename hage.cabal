@@ -24,6 +24,9 @@ common lang
     default-language: Haskell2010
     default-extensions:
       BlockArguments
+      DerivingStrategies
+      FlexibleInstances
+      GeneralizedNewtypeDeriving
       LambdaCase
       OverloadedStrings
       ScopedTypeVariables
@@ -33,14 +36,20 @@ common lang
 library
     import:           lang
     hs-source-dirs:   lib
+    ghc-options: -Wall
     exposed-modules:
       Crypto.Hage
+      Crypto.Hage.FileKey
       Crypto.Hage.Format
+      Crypto.Hage.Payload
+      Crypto.Hage.Recipient.X25519
 
     build-depends:
       base,
+      base64-bytestring,
       bech32,
       bytestring,
+      conduit,
       cryptonite,
       memory,
       text,
@@ -55,16 +64,22 @@ test-suite tests
     main-is:          TestMain.hs
     other-modules:
       Crypto.Hage
+      Crypto.Hage.FileKey
       Crypto.Hage.Format
+      Crypto.Hage.Payload
+      Crypto.Hage.Recipient.X25519
 
     build-depends:
       base,
+      base64-bytestring,
       bech32,
       bytestring,
+      conduit,
       cryptonite,
       filepath,
       hspec,
       memory,
+      QuickCheck,
       shelly,
       temporary,
       text
@@ -77,10 +92,13 @@ executable hage
     -- other-modules:
 
     -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
+    other-extensions:
+      ApplicativeDo
+
     build-depends:
       base ^>=4.15.1.0,
       bytestring,
+      conduit,
       filepath,
       hage,
       optparse-applicative,

@@ -1,12 +1,10 @@
-module Crypto.Hage where
+module Crypto.Hage
+  ( module Crypto.Hage.Payload,
+    module Crypto.Hage.FileKey,
+    module Crypto.Hage.Recipient.X25519,
+  )
+where
 
-import Crypto.PubKey.Curve25519 (SecretKey, toPublic, PublicKey)
-import Crypto.ECC (Curve_X25519(Curve_X25519), encodePoint)
-import Data.Data (Proxy(Proxy))
-import Data.ByteString (ByteString)
-
-newtype AgeIdentity = AgeIdentity SecretKey
-newtype AgeRecipient = AgeRecipient PublicKey
-
-toRecipient :: AgeIdentity -> AgeRecipient
-toRecipient (AgeIdentity sk) = AgeRecipient (toPublic sk)
+import Crypto.Hage.FileKey
+import Crypto.Hage.Payload
+import Crypto.Hage.Recipient.X25519
