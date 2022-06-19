@@ -23,7 +23,10 @@
         {
           haskellProjects.hage = {
             name = "hage";
-            root = ./.;
+            root = lib.cleanSourceWith {
+              src = ./.;
+              filter = path: type: !lib.hasSuffix ".nix" (baseNameOf path);
+            };
             modifier = lib.flip lib.pipe [
               (hlib.addBuildDepend pkgs.age)
               (hlib.generateOptparseApplicativeCompletion "hage")
