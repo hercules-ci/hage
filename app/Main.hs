@@ -1,16 +1,21 @@
+{-# LANGUAGE ApplicativeDo #-}
+
 module Main where
 
+import Conduit (runConduitRes, sinkFileBS, stdinC, yield, (.|))
 import Control.Monad (join)
-import Options.Applicative
+import Crypto.Hage (encryptFileConduit, generateFileKey, toRecipient)
+import Crypto.Hage.Format (parseKeyFile, parseRecipientAddress, recipientToBech32, recipientsToHeader)
+import qualified Crypto.Hage.Recipient.X25519 as X25519
 import qualified Data.ByteString as BS
-import qualified Data.Text.IO as T
-import System.IO (stderr, hPutStrLn)
-import Crypto.Hage.Format (parseKeyFile, recipientToBech32)
-import qualified Data.Text.Encoding as TE
 import Data.Foldable (traverse_)
 import Data.Function ((&))
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
+import qualified Data.Text.IO as T
+import Options.Applicative
 import System.Exit (exitFailure)
-import Crypto.Hage (toRecipient)
+import System.IO (hPutStrLn, stderr)
 
 main :: IO ()
 main = join (execParser opts)
@@ -47,5 +52,34 @@ decryptCommandParser = do
 
 encryptCommandParser :: Parser (IO ())
 encryptCommandParser = do
+  output <-
+    strOption
+      ( long "output"
+          <> completer (bashCompleter "file")
+      )
+
+  recipients <-
+    many
+      ( option
+          x25519recipientsReader
+          ( long "recipient"
+          )
+      )
+
   pure do
-    error "unimplemented: encrypt"
+    fileKey <- generateFileKey
+    stanzas <- recipients & traverse (X25519.share fileKey)
+    let fileHeader = recipientsToHeader fileKey stanzas
+    encrypt <- encryptFileConduit fileKey
+    runConduitRes do
+      ( do
+          yield fileHeader
+          stdinC .| encrypt
+        )
+        .| sinkFileBS output
+
+x25519recipientsReader :: ReadM X25519.AgeX25519RecipientAddress
+x25519recipientsReader = eitherReader \s ->
+  s & T.pack & parseRecipientAddress & \case
+    Left e -> Left (show e)
+    Right r -> Right r

@@ -23,7 +23,10 @@
         {
           haskellProjects.hage = {
             name = "hage";
-            root = ./.;
+            root = lib.cleanSourceWith {
+              src = ./.;
+              filter = path: type: !lib.hasSuffix ".nix" (baseNameOf path);
+            };
             modifier = lib.flip lib.pipe [
               (hlib.addBuildDepend pkgs.age)
               (hlib.generateOptparseApplicativeCompletion "hage")
@@ -51,6 +54,13 @@
             age-keygen -y key.txt >expected
             hage to-recipient-key <key.txt >actual
             diff expected actual
+
+            # hage encrypt
+
+            example=${pkgs.bash}/bin/bash
+            hage encrypt --recipient=$(cat actual) --output encrypted <$example
+            age --decrypt -i key.txt -o decrypted encrypted
+            cmp $example decrypted
 
             set +x
             touch $out
